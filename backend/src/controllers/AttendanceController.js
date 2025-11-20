@@ -1,3 +1,5 @@
+import AttendanceModel from "../models/attendanceModel.js";
+import UserModel from "../models/uerModel.js";
 import calculateDistance from "../utils/calculateDistance.js";
 
 class AttendanceController {
@@ -52,6 +54,94 @@ class AttendanceController {
       message: "You already clocked out today"
     });
   }
+
+
+  async getAttendanceReport(req, res, next) {
+    try {
+      const { startDate, endDate, search } = req.query;
+      const role = req.auth.role;
+      const userId = req.auth.sub;
+
+
+      let employeeIds;
+
+      if (role === "admin") {
+        const users = await UserModel.find().select("_id firstName lastName");
+        employeeIds = users.map(u => u._id);
+      } else if (role === "manager") {
+        const users = await UserModel.find({ $or: [{ organizationId: userId }, { _id: userId }] }).select("_id firstName lastName");
+        employeeIds = users.map(u => u._id);
+      } else {
+
+        employeeIds = [userId];
+      }
+
+
+      let dateFilter = {};
+      if (startDate && endDate) {
+        dateFilter.date = { $gte: startDate, $lte: endDate };
+      }
+
+
+      const attendances = await AttendanceModel.find({
+        userId: { $in: employeeIds },
+        ...dateFilter
+      }).sort({ date: 1 }).populate("userId", "firstName lastName");
+
+
+      const groupedReport = {};
+      attendances.forEach(a => {
+        const userId = a.userId._id.toString();
+        const fullName = `${a.userId.firstName} ${a.userId.lastName}`;
+
+        if (!groupedReport[userId]) {
+          groupedReport[userId] = {
+            userId,
+            fullName,
+            records: [],
+            totalHours: 0
+          };
+        }
+
+
+        let workHour = 0;
+        if (a.clockIn?.time && a.clockOut?.time) {
+          workHour = (new Date(a.clockOut.time) - new Date(a.clockIn.time)) / (1000 * 60 * 60); // hours
+          groupedReport[userId].totalHours += workHour;
+        }
+
+        groupedReport[userId].records.push({
+          date: a.date,
+          clockIn: a.clockIn?.time || null,
+          clockOut: a.clockOut?.time || null,
+          workHour: workHour.toFixed(2)
+        });
+      });
+
+
+
+      let reportArray = Object.values(groupedReport);
+
+
+      if (search) {
+        reportArray = reportArray.filter(r =>
+          r.fullName.toLowerCase().includes(search.toLowerCase())
+        );
+      }
+
+      reportArray.sort((a, b) => a.fullName.localeCompare(b.fullName));
+
+      res.json({
+        period: { startDate, endDate },
+        report: reportArray
+      });
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Server error" });
+    }
+  };
+
 
 
 }

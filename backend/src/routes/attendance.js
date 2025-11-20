@@ -14,6 +14,7 @@ const officeService = new OfficeService(OfficeModel)
 const attendanceController = new AttendanceController(attendanceService, officeService, logger);
 
 router.post('/create', authenticate, (req, res, next) => attendanceController.punch(req, res, next));
+router.get('/', authenticate, (req, res, next) => attendanceController.getAttendanceReport(req, res, next))
 
 
 export default router;
