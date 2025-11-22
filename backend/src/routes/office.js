@@ -14,7 +14,8 @@ const officeController = new OfficeController(officeService, logger);
 
 router.post('/create', authenticate, canAccess([Roles.ADMIN]), (req, res, next) => officeController.punchOffice(req, res, next));
 router.delete('/remove/:id', authenticate, canAccess([Roles.ADMIN]), (req, res, next) => officeController.removeOffice(req, res, next))
-router.get('/', authenticate, canAccess([Roles.ADMIN]), (req, res, next) => officeController.getAll(req, res, next))
+router.get('/', authenticate, (req, res, next) => officeController.getAll(req, res, next))
+router.get('/:id', authenticate, (req, res, next) => officeController.getOneOffice(req, res, next))
 
 
 export default router;

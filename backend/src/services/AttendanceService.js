@@ -40,7 +40,7 @@ class AttendanceService {
 
   async findTodayAttendance(userId) {
     const today = new Date().toISOString().split("T")[0];
-    return this.attendanceModel.findOne({ userId, date: today });
+    return this.attendanceModel.findOne({ $and: [{ userId: userId }, { date: today }] });
   }
 
 }

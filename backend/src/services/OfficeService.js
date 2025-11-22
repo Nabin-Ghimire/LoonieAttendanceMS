@@ -16,8 +16,12 @@ class AttendanceService {
   async remove(id) {
     return await this.OfficeModel.findByIdAndDelete(id);
   }
-  async getAllOffices(id) {
+  async getAllOffices() {
     return await this.OfficeModel.find();
+  }
+
+  async getSingleOffice(id) {
+    return await this.OfficeModel.findById(id);
   }
 }
 

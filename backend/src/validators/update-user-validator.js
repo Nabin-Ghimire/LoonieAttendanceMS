@@ -1,40 +1,34 @@
 import { checkSchema } from 'express-validator';
 
+// Allow partial updates: validate fields only when present in the request body.
 export default checkSchema({
   firstName: {
-    errorMessage: 'First name is required!',
-    notEmpty: true,
+    optional: true,
     trim: true,
   },
   lastName: {
-    errorMessage: 'Last name is required!',
-    notEmpty: true,
+    optional: true,
     trim: true,
   },
   role: {
-    errorMessage: 'Role is required!',
+    optional: true,
     trim: true,
   },
-  email: {
-    isEmail: {
-      errorMessage: 'Email is not valid!',
-    },
-    notEmpty: true,
-    errorMessage: 'Email is required!',
-    trim: true,
-  },
+
   organizationId: {
-    errorMessage: 'Organization ID is required!',
+    optional: true,
     trim: true,
     custom: {
       options: (value, { req }) => {
-        const role = req.body.role;
-        if (role === 'admin' && role === 'manager') {
-          return true; // admin can have tenantId as null , return true means passing the validation
-        } else {
-          return !!value; // tenantId is required for non-admin users, return false if value is empty
-        }
+        // If role is not being updated, don't enforce organizationId here.
+        const role = req.auth.role;
+        if (!role) return true;
+        // Admin and manager may have no organizationId
+        if (role === 'admin' || role === 'manager') return true;
+        // For other roles, require a non-empty organizationId
+        return !!value;
       },
+      errorMessage: 'Organization ID is required for non-admin/manager users',
     },
   },
 });

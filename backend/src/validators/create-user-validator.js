@@ -11,10 +11,22 @@ export default checkSchema({
     },
   },
 
-  name: {
-    errorMessage: 'Name is required',
+  firstName: {
+    errorMessage: 'First name is required',
     notEmpty: true,
 
   },
+  lastName: {
+    errorMessage: 'Last name is required',
+    notEmpty: true,
+  },
+  organizationId: {
+    optional: true,
+    trim: true,
+  },
+  role: {
+    optional: true,
+    trim: true,
+  }
 
 });

@@ -21,20 +21,30 @@ class OfficeController {
 
     const office = await this.officeService.punch(payload);
 
-    return res.status(201).json({ message: "Clock-in successful", office });
-  }
+    res.status(201).json({ message: "Clock-in successful", office });
 
+    this.logger.info('Office created', { id: String(office._id) });
+  }
 
   async removeOffice(req, res, next) {
     const officeId = req.params.id;
     const office = await this.officeService.remove(officeId);
-    res.json({ id: office, message: "Office deleted successfully" })
+    res.status(200).json({ id: office, message: "Office deleted successfully" })
+    this.logger.info('Office deleted', { id: String(officeId) });
   }
 
   async getAll(req, res, next) {
 
     const offices = await this.officeService.getAllOffices();
-    res.json(offices)
+    res.status(200).json(offices)
+    this.logger.info('Fetched all offices');
+  }
+
+  async getOneOffice(req, res, next) {
+    const { id } = req.params;
+    const offices = await this.officeService.getSingleOffice(id);
+    res.status(200).json(offices)
+    this.logger.info('Fetched single office', { id: String(id) });
   }
 }
 

@@ -1,5 +1,6 @@
 import axios from "axios";
-// import { userAuthStore } from "../store";
+import { userAuthStore } from "../store.js";
+import { AUTH } from '../http/api.js'
 export const api = axios.create(
   {
     baseURL: import.meta.env.VITE_BACKEND_API_URL,
@@ -12,7 +13,7 @@ export const api = axios.create(
   });
 
 const refreshToken = async () => {
-  return await axios.post(`${import.meta.env.VITE_BACKEND_API_URL}/auth/refresh`, {}, { withCredentials: true, });
+  return await axios.post(`${import.meta.env.VITE_BACKEND_API_URL}${AUTH}/refresh-token`, {}, { withCredentials: true, });
 
 };
 //Due to post request we need to pass the empty object as data in the request body,
@@ -33,7 +34,7 @@ api.interceptors.response.use((response) => response, async (error) => {
       console.error("Token refresh error", err);
       //logout or redirect to login page
       //window.location.href="http://clientui/login" OR,
-      // userAuthStore.getState().logout();
+      userAuthStore.getState().logout();
       return Promise.reject(err);
 
     }

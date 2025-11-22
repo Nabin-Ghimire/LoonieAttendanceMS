@@ -13,8 +13,8 @@ class UserService {
 
   findUserByEmail = async (email) => {
     try {
-      return await this.UserModel.findOne({ email })
-    } catch {
+      return await this.UserModel.findOne({ email }).select('+password');
+    } catch (error) {
       throw error;
     }
   }
@@ -85,17 +85,9 @@ class UserService {
     }
   }
 
-  updateUser = async ({ data }) => {
+  updateUser = async (id, data) => {
     try {
-      return await this.UserModel.create(data);
-    } catch (error) {
-      throw (error);
-    }
-  }
-
-  updateUser = async (id, { data }) => {
-    try {
-      return await this.UserModel.findByIdAndUpdate(id, data);
+      return await this.UserModel.findByIdAndUpdate(id, data, { new: true, runValidators: true });
     } catch (error) {
       throw (error);
     }

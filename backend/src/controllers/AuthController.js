@@ -105,6 +105,7 @@ class AuthController {
       });
 
       res.status(200).json({ user: findUser });
+      this.logger.info('User logged in', { id: String(findUser._id) });
 
     } catch (error) {
       next(error);
@@ -119,6 +120,7 @@ class AuthController {
         return next(createHttpError(404, "User not found"));
       }
       res.status(200).json({ user });
+      this.logger.info('Fetched self user data', { id: String(userId) });
     } catch (error) {
       next(error);
     }
@@ -155,6 +157,7 @@ class AuthController {
       })
 
       res.status(200).json({ id: user._id })
+      this.logger.info('Token refreshed', { id: String(user._id) });
     } catch (error) {
       next(error)
     }
@@ -172,6 +175,7 @@ class AuthController {
       res.clearCookie('accessToken');
       res.clearCookie('refreshToken');
       res.status(200).json({ message: "Logged out successfully" });
+      this.logger.info('User logged out', { id: String(req.auth.sub) });
     } catch (error) {
       next(error);
     }

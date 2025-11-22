@@ -14,5 +14,16 @@ export default defineConfig({
   resolve: {
     alias: { '@': path.resolve('src') }
   }
-
+  ,
+  // Dev server proxy to forward /api requests to backend so cookies are same-origin
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path,
+      },
+    },
+  }
 })

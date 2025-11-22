@@ -3,12 +3,12 @@ import { checkSchema } from 'express-validator';
 export default checkSchema({
   firstName: {
     notEmpty: {
-      errorMessage: 'Name is required',
+      errorMessage: 'First name is required',
     },
   },
   lastName: {
     notEmpty: {
-      errorMessage: 'Name is required',
+      errorMessage: 'Last name is required',
     },
   },
   email: {

@@ -14,11 +14,15 @@ class AttendanceController {
     const { lat, lng } = req.body;
     const userId = req.auth.sub;
 
+
+    const latNum = parseFloat(lat);
+    const lngNum = parseFloat(lng);
+    console.log('Punch request received:', { userId, lat, lng });
     const office = await this.officeService.findOffice();
     if (!office) return res.status(500).json({ message: "Office not configured" });
 
     const [officeLng, officeLat] = office.location.coordinates;
-    const distance = calculateDistance(lng, lat, officeLat, officeLng);
+    const distance = calculateDistance(lngNum, latNum, officeLat, officeLng);
 
     if (distance > office.radiusMeters) {
       return res.status(403).json({
@@ -29,6 +33,7 @@ class AttendanceController {
 
     // CHECK TODAY'S ATTENDANCE
     const todayAttendance = await this.attendanceService.findTodayAttendance(userId);
+    console.log('Today Attendance:', todayAttendance);
 
     // --- MORNING (CLOCK IN) ---
     if (!todayAttendance) {
@@ -38,6 +43,7 @@ class AttendanceController {
         message: "Clock-in successful",
         attendance
       });
+      this.logger.info('User clocked in', { id: String(attendance._id) });
     }
 
     if (!(todayAttendance.toObject()).clockOut) {      // --- EVENING (CLOCK OUT) ---
@@ -47,6 +53,7 @@ class AttendanceController {
         message: "Clock-out successful",
         attendance: updated
       });
+      this.logger.info('User clocked out', { id: String(updated._id) });
     }
 
     // Already clocked out
@@ -131,10 +138,11 @@ class AttendanceController {
 
       reportArray.sort((a, b) => a.fullName.localeCompare(b.fullName));
 
-      res.json({
+      res.status(200).json({
         period: { startDate, endDate },
         report: reportArray
       });
+      this.logger.info('Generated attendance report', { requestedBy: String(userId) });
 
     } catch (error) {
       console.error(error);
