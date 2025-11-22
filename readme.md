@@ -59,7 +59,7 @@ The system allows employees to clock-in and clock-out using geolocation within o
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/loonie-attendance.git
+https://github.com/Nabin-Ghimire/LoonieAttendanceMS.git
 cd loonie-attendance
 
 # Install backend dependencies
