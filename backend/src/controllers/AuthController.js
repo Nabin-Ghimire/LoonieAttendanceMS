@@ -175,6 +175,7 @@ class AuthController {
   async logOutUser(req, res, next) {
 
     const isProd = process.env.NODE_ENV === 'production'
+    const refreshTokenId = req.auth.id;
 
     try {
       await this.tokenService.deleteRefreshTokenById(refreshTokenId);
