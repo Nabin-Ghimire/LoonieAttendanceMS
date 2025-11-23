@@ -54,21 +54,27 @@ const Users = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
 
+    const orgValue = e.target.organizationId?.value;
+
     const updated = {
       firstName: e.target.firstName.value,
       lastName: e.target.lastName.value,
-      role: e.target.role.value,
-      organizationId: e.target.organizationId.value
+      role: e.target.role.value
     };
+
+    if (orgValue) {
+      updated.organizationId = orgValue;
+    }
+
+    console.log(updated);
 
     try {
       updateUserMutation.mutate({ data: updated, id: editingUser._id });
-      document.getElementById("edit_user_modal").close();  // refresh table if using react-query
+      document.getElementById("edit_user_modal").close();
     } catch (err) {
       console.log(err);
     }
   };
-
   const handleCreate = async (e) => {
     e.preventDefault();
 
@@ -76,16 +82,21 @@ const Users = () => {
       firstName: e.target.firstName.value,
       lastName: e.target.lastName.value,
       email: e.target.email.value,
-      role: e.target.role.value,
-      organizationId: e.target.organizationId ? e.target.organizationId.value : null
-
+      role: e.target.role.value
     };
+
+    const orgValue = e.target.organizationId?.value;
+    if (orgValue) {
+      createdUser.organizationId = orgValue;
+    }
+
     try {
       createUserMutation.mutate(createdUser);
-      document.getElementById("create_user_modal").close();  // refresh table if using react-query
+      document.getElementById("create_user_modal").close();
     } catch (err) {
       console.log(err);
     }
+
   };
 
 
