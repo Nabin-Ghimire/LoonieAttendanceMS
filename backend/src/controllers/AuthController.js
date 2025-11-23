@@ -92,15 +92,15 @@ class AuthController {
 
       res.cookie('accessToken', accessToken, {
         httpOnly: true,
-        sameSite: 'strict',
-        domain: 'localhost',
+        secure: true,
+        sameSite: 'none',
         maxAge: 60 * 60 * 1000,
       });
 
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        sameSite: 'strict',
-        domain: 'localhost',
+        secure: true,
+        sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
