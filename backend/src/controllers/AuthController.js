@@ -133,6 +133,11 @@ class AuthController {
       organizationId: req.auth.organizationId ? String(req.auth.organizationId) : ''
     }
 
+    const storedToken = await this.tokenService.findRefreshTokenById(req.auth.id);
+    if (!storedToken) {
+      return res.status(401).json({ message: "Invalid refresh token" });
+    }
+
     try {
       const accessToken = await this.tokenService.generateAccessToken(jwtPayload);
       const user = await this.userService.findUserById(req.auth.sub);
@@ -142,17 +147,18 @@ class AuthController {
       const newRefreshToken = await this.tokenService.persistRefreshToken(user);
       await this.tokenService.deleteRefreshTokenById(req.auth.id)
       const refreshToken = await this.tokenService.generateRefreshToken({ ...jwtPayload, id: String(newRefreshToken._id) })
+      const isProd = process.env.NODE_ENV === 'production'
       res.cookie('accessToken', accessToken, {
-        domain: 'localhost',
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: isProd ? "none" : "lax",
+        secure: isProd,
         maxAge: 1000 * 60 * 60 //1 hour 
       })
 
       res.cookie('refreshToken', refreshToken, {
-        domain: 'localhost',
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: isProd ? "none" : "lax",
+        secure: isProd,
         maxAge: 1000 * 60 * 60 * 7 //7 days
       })
 
@@ -168,12 +174,21 @@ class AuthController {
 
   async logOutUser(req, res, next) {
 
-    console.log("Logout request received", req.auth);
-    const refreshTokenId = req.auth.id;
+    const isProd = process.env.NODE_ENV === 'production'
+
     try {
       await this.tokenService.deleteRefreshTokenById(refreshTokenId);
-      res.clearCookie('accessToken');
-      res.clearCookie('refreshToken');
+      res.clearCookie('accessToken', {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
+      });
+
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
+      });
       res.status(200).json({ message: "Logged out successfully" });
       this.logger.info('User logged out', { id: String(req.auth.sub) });
     } catch (error) {

@@ -37,7 +37,11 @@ export class TokenService {
   }
 
   async deleteRefreshTokenById(tokenId) {
-    await this.RefreshTokenModel.deleteOne({ id: tokenId });
+    await this.RefreshTokenModel.deleteOne({ _id: tokenId });
+  }
+
+  async findRefreshTokenById(id) {
+    return await this.RefreshTokenModel.findById(id);
   }
 }
 
